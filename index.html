@@ -7,24 +7,40 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* PWA için mobil cihazlarda kaydırmayı ve seçimi optimize etme */
         body {
             -webkit-tap-highlight-color: transparent;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
         }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* DÜZELTME 3: Nav fixed + max-w-md çakışması için wrapper çözümü */
+        .nav-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 50;
+        }
+        .nav-inner {
+            width: 100%;
+            max-width: 28rem; /* max-w-md */
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col pb-20">
 
     <header class="bg-slate-800/80 backdrop-blur-md sticky top-0 z-50 px-4 py-3 border-b border-slate-700 flex justify-between items-center">
         <div>
-            <h1 class="text-lg font-bold text-emerald-400"><i class="fa-solid class= fa-compass mr-2"></i>Colombia '26</h1>
+            <!-- DÜZELTME 1: Bozuk class="fa-solid class= fa-compass" → class="fa-solid fa-compass" -->
+            <h1 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-compass mr-2"></i>Colombia '26</h1>
             <p class="text-xs text-slate-400">1 - 18 Temmuz 2026</p>
         </div>
         <div class="bg-slate-700/50 px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-2 border border-slate-600">
-            <span class="w-2 height-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <!-- DÜZELTME 2: height-2 → h-2 -->
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             Offline Hazır
         </div>
     </header>
@@ -40,18 +56,33 @@
                     <label class="block text-xs text-slate-400 mb-1">Kolombiya Pesosu (COP)</label>
                     <div class="flex items-center">
                         <span class="text-slate-500 mr-1">$</span>
-                        <input type="number" id="copInput" placeholder="50000" class="w-full bg-transparent font-bold text-lg focus:outline-none text-white" oninput="convertCurrency('cop')">
+                        <!-- DÜZELTME 4: min="0" eklendi -->
+                        <input type="number" id="copInput" placeholder="50000" min="0" class="w-full bg-transparent font-bold text-lg focus:outline-none text-white" oninput="convertCurrency('cop')">
                     </div>
                 </div>
                 <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-700">
                     <label class="block text-xs text-slate-400 mb-1">Türk Lirası (TRY)</label>
                     <div class="flex items-center">
                         <span class="text-slate-500 mr-1">₺</span>
-                        <input type="number" id="tryInput" placeholder="425" class="w-full bg-transparent font-bold text-lg focus:outline-none text-white" oninput="convertCurrency('try')">
+                        <!-- DÜZELTME 4: min="0" eklendi -->
+                        <input type="number" id="tryInput" placeholder="425" min="0" class="w-full bg-transparent font-bold text-lg focus:outline-none text-white" oninput="convertCurrency('try')">
                     </div>
                 </div>
             </div>
-            <p class="text-[10px] text-slate-500 mt-2 text-right">* Sabit simüle kur: 10.000 COP ≈ 85 TL baz alınmıştır.</p>
+            <div class="mt-3 flex items-center gap-2">
+                <div class="flex-1 bg-slate-900/50 p-2 rounded-xl border border-slate-700 flex items-center gap-2">
+                    <span class="text-xs text-slate-400">Kur:</span>
+                    <!-- DÜZELTME 5: Kullanıcı kuru güncelleyebilir -->
+                    <input type="number" id="rateInput" placeholder="85" min="0" step="0.1"
+                        class="w-full bg-transparent text-xs font-bold text-emerald-400 focus:outline-none"
+                        oninput="updateRate()" title="10.000 COP karşılığı TRY">
+                    <span class="text-xs text-slate-500 shrink-0">TRY / 10k COP</span>
+                </div>
+                <button onclick="resetRate()" class="text-xs text-slate-500 hover:text-emerald-400 transition-colors px-2 py-1 rounded-lg border border-slate-700 bg-slate-900/50">
+                    Sıfırla
+                </button>
+            </div>
+            <p class="text-[10px] text-slate-500 mt-1.5 text-right">* Kuru manuel güncelleyebilirsiniz.</p>
         </section>
 
         <section class="space-y-3">
@@ -60,7 +91,7 @@
             </h2>
             
             <div class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar snap-x">
-                <button onclick="switchCity('bogota')" id="btn-bogota" class="city-btn active-btn snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold border transition-all bg-emerald-500 text-slate-900 border-emerald-400 shadow-lg shadow-emerald-500/10">
+                <button onclick="switchCity('bogota')" id="btn-bogota" class="city-btn snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold border transition-all bg-emerald-500 text-slate-900 border-emerald-400 shadow-lg shadow-emerald-500/10">
                     📍 Bogotá (1-4 Tem)
                 </button>
                 <button onclick="switchCity('medellin')" id="btn-medellin" class="city-btn snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold border transition-all bg-slate-800 text-slate-300 border-slate-700">
@@ -78,7 +109,7 @@
             </div>
 
             <div id="city-content" class="bg-slate-800 rounded-2xl border border-slate-700 shadow-xl overflow-hidden min-h-[300px]">
-                </div>
+            </div>
         </section>
 
         <section class="bg-slate-800 p-4 rounded-2xl border border-slate-700 shadow-xl">
@@ -111,28 +142,48 @@
 
     </main>
 
-    <nav class="bg-slate-800/95 backdrop-blur-md fixed bottom-0 left-0 right-0 border-t border-slate-700 py-2 px-6 flex justify-around items-center max-w-md mx-auto z-50">
-        <a href="https://www.cabify.com" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
-            <i class="fa-solid fa-car text-xl"></i>
-            <span class="text-[10px]">Cabify</span>
-        </a>
-        <a href="https://www.uber.com" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
-            <i class="fa-solid fa-taxi text-xl"></i>
-            <span class="text-[10px]">Uber</span>
-        </a>
-        <a href="https://www.google.com/maps" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
-            <i class="fa-solid fa-map-location-dot text-xl"></i>
-            <span class="text-[10px]">Harita</span>
-        </a>
-        <a href="https://translate.google.com" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
-            <i class="fa-solid fa-language text-xl"></i>
-            <span class="text-[10px]">Çeviri</span>
-        </a>
-    </nav>
+    <!-- DÜZELTME 3: nav-wrapper ile fixed + max-w-md çakışması çözüldü -->
+    <div class="nav-wrapper">
+        <nav class="nav-inner bg-slate-800/95 backdrop-blur-md border-t border-slate-700 py-2 px-6 flex justify-around items-center">
+            <a href="https://www.cabify.com" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
+                <i class="fa-solid fa-car text-xl"></i>
+                <span class="text-[10px]">Cabify</span>
+            </a>
+            <a href="https://www.uber.com" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
+                <i class="fa-solid fa-taxi text-xl"></i>
+                <span class="text-[10px]">Uber</span>
+            </a>
+            <a href="https://www.google.com/maps" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
+                <i class="fa-solid fa-map-location-dot text-xl"></i>
+                <span class="text-[10px]">Harita</span>
+            </a>
+            <a href="https://translate.google.com" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
+                <i class="fa-solid fa-language text-xl"></i>
+                <span class="text-[10px]">Çeviri</span>
+            </a>
+        </nav>
+    </div>
 
     <script>
-        // Sabit Simüle Döviz Kuru (10.000 COP = 85 TRY)
-        const RATE = 0.0085;
+        // Varsayılan kur: 10.000 COP = 85 TRY
+        const DEFAULT_RATE = 0.0085;
+        let currentRate = DEFAULT_RATE;
+
+        // DÜZELTME 5: Kur güncelleme fonksiyonları
+        function updateRate() {
+            const rateInput = document.getElementById('rateInput');
+            const val = parseFloat(rateInput.value);
+            if (!isNaN(val) && val > 0) {
+                currentRate = val / 10000;
+            }
+        }
+
+        function resetRate() {
+            currentRate = DEFAULT_RATE;
+            document.getElementById('rateInput').value = '';
+            document.getElementById('copInput').value = '';
+            document.getElementById('tryInput').value = '';
+        }
 
         function convertCurrency(type) {
             const copInput = document.getElementById('copInput');
@@ -140,10 +191,10 @@
 
             if (type === 'cop') {
                 const val = parseFloat(copInput.value);
-                tryInput.value = !isNaN(val) ? (val * RATE).toFixed(1) : '';
+                tryInput.value = !isNaN(val) ? (val * currentRate).toFixed(1) : '';
             } else {
                 const val = parseFloat(tryInput.value);
-                copInput.value = !isNaN(val) ? (val / RATE).toFixed(0) : '';
+                copInput.value = !isNaN(val) ? (val / currentRate).toFixed(0) : '';
             }
         }
 
@@ -204,9 +255,7 @@
             }
         };
 
-        // Dinamik Şehir Değiştirme Fonksiyonu
         function switchCity(cityKey) {
-            // Butonların aktiflik durumunu güncelleme
             document.querySelectorAll('.city-btn').forEach(btn => {
                 btn.classList.remove('bg-emerald-500', 'text-slate-900', 'border-emerald-400', 'shadow-lg', 'shadow-emerald-500/10');
                 btn.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
@@ -215,7 +264,6 @@
             selectedBtn.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-700');
             selectedBtn.classList.add('bg-emerald-500', 'text-slate-900', 'border-emerald-400', 'shadow-lg', 'shadow-emerald-500/10');
 
-            // İçeriği güncelleme
             const city = data[cityKey];
             let daysHTML = '';
             
@@ -249,7 +297,6 @@
             `;
         }
 
-        // Uygulama ilk açıldığında Bogotá'yı yükle
         window.onload = () => {
             switchCity('bogota');
         };
