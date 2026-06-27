@@ -4,302 +4,579 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kolombiya Macerası 2026</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            -webkit-tap-highlight-color: transparent;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        *{box-sizing:border-box;margin:0;padding:0;}
+        body{
+            font-family:system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+            min-height:100vh; padding-bottom:5rem;
+            color:#f0ece4;
+            transition: background 0.8s ease;
+            position:relative; overflow-x:hidden;
         }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* DÜZELTME 3: Nav fixed + max-w-md çakışması için wrapper çözümü */
-        .nav-wrapper {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            z-index: 50;
+        /* ── CITY BACKGROUNDS ── */
+        body.bg-bogota {
+            background:
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(100,140,200,.25) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 20% 100%, rgba(30,50,100,.4) 0%, transparent 55%),
+                linear-gradient(175deg, #0d1520 0%, #1a2540 35%, #0d1a30 65%, #080f1a 100%);
         }
-        .nav-inner {
-            width: 100%;
-            max-width: 28rem; /* max-w-md */
+        body.bg-medellin {
+            background:
+                radial-gradient(ellipse 70% 50% at 80% 20%, rgba(200,70,50,.2) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 40% at 10% 80%, rgba(160,50,30,.25) 0%, transparent 50%),
+                linear-gradient(160deg, #1a0d0a 0%, #2d1208 30%, #1f1510 60%, #0f0a08 100%);
         }
+        body.bg-kahve {
+            background:
+                radial-gradient(ellipse 80% 50% at 30% 10%, rgba(80,140,60,.25) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 50% at 70% 90%, rgba(100,70,30,.3) 0%, transparent 50%),
+                linear-gradient(165deg, #080f06 0%, #0f1a0a 30%, #141208 60%, #0a0d06 100%);
+        }
+        body.bg-santa {
+            background:
+                radial-gradient(ellipse 90% 40% at 50% 0%, rgba(20,150,180,.2) 0%, transparent 55%),
+                radial-gradient(ellipse 70% 50% at 80% 100%, rgba(10,100,130,.25) 0%, transparent 55%),
+                linear-gradient(170deg, #04111a 0%, #061a22 30%, #081520 60%, #040d14 100%);
+        }
+        body.bg-cartagena {
+            background:
+                radial-gradient(ellipse 80% 50% at 60% 0%, rgba(200,130,30,.22) 0%, transparent 55%),
+                radial-gradient(ellipse 60% 40% at 10% 90%, rgba(180,80,20,.2) 0%, transparent 50%),
+                linear-gradient(160deg, #160b02 0%, #241205 30%, #1a1008 60%, #0e0804 100%);
+        }
+
+        /* ── SVG SCENE CANVAS ── */
+        #scene-canvas {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            z-index:0; pointer-events:none;
+            transition: opacity 0.6s ease;
+        }
+
+        /* ── OVERLAY GRAIN ── */
+        body::after {
+            content:'';
+            position:fixed;top:0;left:0;width:100%;height:100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events:none; z-index:1; opacity:.5;
+        }
+
+        /* ── HEADER ── */
+        .app-header{
+            background:rgba(0,0,0,.45); backdrop-filter:blur(14px);
+            border-bottom:1px solid rgba(255,255,255,.08);
+            position:sticky;top:0;z-index:50;
+            padding:.75rem 1rem;
+            display:flex;justify-content:space-between;align-items:center;
+        }
+        .app-header h1{font-size:1.1rem;font-weight:700;transition:color .6s;}
+        .app-header p{font-size:.7rem;color:rgba(255,255,255,.4);margin-top:2px;}
+        .badge{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+               border-radius:99px;padding:.3rem .75rem;font-size:.68rem;font-weight:500;color:rgba(255,255,255,.45);
+               display:flex;align-items:center;gap:.4rem;}
+        .dot{width:7px;height:7px;border-radius:50%;background:#4ade80;animation:pulse 2s infinite;}
+        @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+        /* ── CARDS ── */
+        .card{
+            background:rgba(0,0,0,.45);
+            backdrop-filter:blur(16px);
+            border:1px solid rgba(255,255,255,.09);
+            border-radius:1.25rem;overflow:hidden;
+            position:relative;z-index:10;
+        }
+        .cp{padding:1rem;}
+        .slbl{font-size:.68rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;
+              color:rgba(255,255,255,.3);display:flex;align-items:center;gap:.4rem;margin-bottom:.85rem;}
+
+        /* ── CURRENCY ── */
+        .cgrid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+        .cbox{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:.875rem;padding:.75rem;}
+        .cbox label{display:block;font-size:.64rem;color:rgba(255,255,255,.3);margin-bottom:.3rem;}
+        .cbox input{background:transparent;border:none;outline:none;font-size:1.1rem;font-weight:700;color:#f0ece4;width:100%;}
+        .csym{color:rgba(255,255,255,.2);margin-right:2px;font-size:.9rem;}
+        .rrow{display:flex;align-items:center;gap:.5rem;margin-top:.65rem;}
+        .rbox{flex:1;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);
+              border-radius:.75rem;padding:.45rem .75rem;display:flex;align-items:center;gap:.4rem;}
+        .rbox input{background:transparent;border:none;outline:none;font-size:.75rem;font-weight:700;width:100%;transition:color .6s;}
+        .rlbl{font-size:.62rem;color:rgba(255,255,255,.2);white-space:nowrap;}
+        .rbtn{font-size:.68rem;color:rgba(255,255,255,.25);cursor:pointer;padding:.4rem .65rem;
+              background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);border-radius:.6rem;transition:color .2s;}
+        .rbtn:hover{color:#fff;}
+        .rnote{font-size:.6rem;color:rgba(255,255,255,.18);text-align:right;margin-top:.4rem;}
+
+        /* ── TABS ── */
+        .tabs{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.5rem;}
+        .tabs::-webkit-scrollbar{display:none;}
+        .tabs{-ms-overflow-style:none;scrollbar-width:none;}
+        .tbtn{flex-shrink:0;padding:.45rem 1rem;border-radius:.875rem;font-size:.7rem;font-weight:700;
+              border:1px solid rgba(255,255,255,.1);cursor:pointer;
+              background:rgba(0,0,0,.35);color:rgba(255,255,255,.4);
+              white-space:nowrap;transition:all .3s;backdrop-filter:blur(8px);}
+        .tbtn.on{color:#fff;border-color:rgba(255,255,255,.3);}
+        .tbtn[data-c="bogota"].on    {background:rgba(42,74,127,.7); box-shadow:0 0 20px rgba(107,159,212,.25);}
+        .tbtn[data-c="medellin"].on  {background:rgba(192,57,43,.7); box-shadow:0 0 20px rgba(232,114,90,.25);}
+        .tbtn[data-c="kahve"].on     {background:rgba(74,124,63,.7); box-shadow:0 0 20px rgba(143,190,106,.25);}
+        .tbtn[data-c="santamarta"].on{background:rgba(14,116,144,.7);box-shadow:0 0 20px rgba(91,191,212,.25);}
+        .tbtn[data-c="cartagena"].on {background:rgba(180,83,9,.7);  box-shadow:0 0 20px rgba(240,169,71,.3);}
+
+        /* ── CITY CONTENT ── */
+        #cc{min-height:300px;position:relative;z-index:10;}
+        .chdr{padding:1rem;border-bottom:1px solid rgba(255,255,255,.07);
+              display:flex;justify-content:space-between;align-items:center;}
+        .chdr h3{font-size:1rem;font-weight:700;color:#fff;}
+        .chdr p{font-size:.7rem;margin-top:2px;transition:color .6s;}
+        .cbdy{padding:1rem;}
+        .calert{font-size:.72rem;padding:.75rem;border-radius:.75rem;line-height:1.65;margin-bottom:1rem;
+                backdrop-filter:blur(8px);}
+        .tl{display:flex;flex-direction:column;gap:1.2rem;}
+        .ti{padding-left:1.2rem;position:relative;}
+        .ti::before{content:'';position:absolute;left:0;top:0;bottom:-1.2rem;width:2px;opacity:.35;}
+        .ti:last-child::before{bottom:0;}
+        .tdot{position:absolute;left:-5px;top:5px;width:12px;height:12px;border-radius:50%;
+              border:2px solid rgba(0,0,0,.5);}
+        .tday{font-size:.68rem;font-weight:700;margin-bottom:.2rem;transition:color .6s;}
+        .ttxt{font-size:.8rem;color:rgba(255,255,255,.5);line-height:1.6;}
+
+        /* City accent colors */
+        .ab .chdr p,.ab .tday{color:#6B9FD4;}
+        .ab .pin{color:#6B9FD4;}
+        .ab .calert{background:rgba(42,74,127,.25);border:1px solid rgba(107,159,212,.2);color:#a0bde0;}
+        .ab .ti::before,.ab .tdot{background:#6B9FD4;}
+        .am .chdr p,.am .tday{color:#E8725A;}
+        .am .pin{color:#E8725A;}
+        .am .calert{background:rgba(192,57,43,.25);border:1px solid rgba(232,114,90,.2);color:#f0a898;}
+        .am .ti::before,.am .tdot{background:#E8725A;}
+        .ak .chdr p,.ak .tday{color:#8FBE6A;}
+        .ak .pin{color:#8FBE6A;}
+        .ak .calert{background:rgba(74,124,63,.25);border:1px solid rgba(143,190,106,.2);color:#a8d888;}
+        .ak .ti::before,.ak .tdot{background:#8FBE6A;}
+        .as .chdr p,.as .tday{color:#5BBFD4;}
+        .as .pin{color:#5BBFD4;}
+        .as .calert{background:rgba(14,116,144,.25);border:1px solid rgba(91,191,212,.2);color:#90d8e8;}
+        .as .ti::before,.as .tdot{background:#5BBFD4;}
+        .ac .chdr p,.ac .tday{color:#F0A947;}
+        .ac .pin{color:#F0A947;}
+        .ac .calert{background:rgba(180,83,9,.25);border:1px solid rgba(240,169,71,.25);color:#f0c878;}
+        .ac .ti::before,.ac .tdot{background:#F0A947;}
+
+        /* ── DICTIONARY ── */
+        .di{display:flex;justify-content:space-between;align-items:center;
+            background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.07);
+            border-radius:.875rem;padding:.6rem .85rem;margin-bottom:.45rem;}
+        .di:last-child{margin-bottom:0;}
+        .dw{font-weight:700;font-size:.8rem;transition:color .6s;}
+        .dd{font-size:.75rem;color:rgba(255,255,255,.35);text-align:right;}
+
+        /* ── NAV ── */
+        .nwrap{position:fixed;bottom:0;left:0;right:0;display:flex;justify-content:center;z-index:50;}
+        .ninner{width:100%;max-width:28rem;background:rgba(0,0,0,.6);backdrop-filter:blur(16px);
+                border-top:1px solid rgba(255,255,255,.08);padding:.5rem 1.5rem;
+                display:flex;justify-content:space-around;align-items:center;}
+        .ninner a{display:flex;flex-direction:column;align-items:center;gap:3px;
+                  color:rgba(255,255,255,.25);font-size:.6rem;text-decoration:none;transition:color .2s;}
+        .ninner a i{font-size:1.2rem;}
+
+        main{padding:1rem;max-width:28rem;margin:0 auto;width:100%;
+             display:flex;flex-direction:column;gap:1.25rem;position:relative;z-index:10;}
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col pb-20">
+<body class="bg-bogota">
 
-    <header class="bg-slate-800/80 backdrop-blur-md sticky top-0 z-50 px-4 py-3 border-b border-slate-700 flex justify-between items-center">
-        <div>
-            <!-- DÜZELTME 1: Bozuk class="fa-solid class= fa-compass" → class="fa-solid fa-compass" -->
-            <h1 class="text-lg font-bold text-emerald-400"><i class="fa-solid fa-compass mr-2"></i>Colombia '26</h1>
-            <p class="text-xs text-slate-400">1 - 18 Temmuz 2026</p>
-        </div>
-        <div class="bg-slate-700/50 px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-2 border border-slate-600">
-            <!-- DÜZELTME 2: height-2 → h-2 -->
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            Offline Hazır
-        </div>
-    </header>
+<!-- SVG Scene Background -->
+<svg id="scene-canvas" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
+    <defs>
+        <filter id="blur1"><feGaussianBlur stdDeviation="1.5"/></filter>
+        <filter id="blur2"><feGaussianBlur stdDeviation="2.5"/></filter>
+        <filter id="blur3"><feGaussianBlur stdDeviation="4"/></filter>
+    </defs>
+    <g id="scene-group"></g>
+</svg>
 
-    <main class="flex-1 p-4 max-w-md mx-auto w-full space-y-6">
-
-        <section class="bg-slate-800 p-4 rounded-2xl border border-slate-700 shadow-xl">
-            <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-money-bill-transfer text-emerald-400"></i> COP → TRY Çevirici
-            </h2>
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-700">
-                    <label class="block text-xs text-slate-400 mb-1">Kolombiya Pesosu (COP)</label>
-                    <div class="flex items-center">
-                        <span class="text-slate-500 mr-1">$</span>
-                        <!-- DÜZELTME 4: min="0" eklendi -->
-                        <input type="number" id="copInput" placeholder="50000" min="0" class="w-full bg-transparent font-bold text-lg focus:outline-none text-white" oninput="convertCurrency('cop')">
-                    </div>
-                </div>
-                <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-700">
-                    <label class="block text-xs text-slate-400 mb-1">Türk Lirası (TRY)</label>
-                    <div class="flex items-center">
-                        <span class="text-slate-500 mr-1">₺</span>
-                        <!-- DÜZELTME 4: min="0" eklendi -->
-                        <input type="number" id="tryInput" placeholder="425" min="0" class="w-full bg-transparent font-bold text-lg focus:outline-none text-white" oninput="convertCurrency('try')">
-                    </div>
-                </div>
-            </div>
-            <div class="mt-3 flex items-center gap-2">
-                <div class="flex-1 bg-slate-900/50 p-2 rounded-xl border border-slate-700 flex items-center gap-2">
-                    <span class="text-xs text-slate-400">Kur:</span>
-                    <!-- DÜZELTME 5: Kullanıcı kuru güncelleyebilir -->
-                    <input type="number" id="rateInput" placeholder="85" min="0" step="0.1"
-                        class="w-full bg-transparent text-xs font-bold text-emerald-400 focus:outline-none"
-                        oninput="updateRate()" title="10.000 COP karşılığı TRY">
-                    <span class="text-xs text-slate-500 shrink-0">TRY / 10k COP</span>
-                </div>
-                <button onclick="resetRate()" class="text-xs text-slate-500 hover:text-emerald-400 transition-colors px-2 py-1 rounded-lg border border-slate-700 bg-slate-900/50">
-                    Sıfırla
-                </button>
-            </div>
-            <p class="text-[10px] text-slate-500 mt-1.5 text-right">* Kuru manuel güncelleyebilirsiniz.</p>
-        </section>
-
-        <section class="space-y-3">
-            <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2 px-1">
-                <i class="fa-solid fa-route text-emerald-400"></i> Seyahat Rotası
-            </h2>
-            
-            <div class="flex gap-2 overflow-x-auto pb-2 hide-scrollbar snap-x">
-                <button onclick="switchCity('bogota')" id="btn-bogota" class="city-btn snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold border transition-all bg-emerald-500 text-slate-900 border-emerald-400 shadow-lg shadow-emerald-500/10">
-                    📍 Bogotá (1-4 Tem)
-                </button>
-                <button onclick="switchCity('medellin')" id="btn-medellin" class="city-btn snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold border transition-all bg-slate-800 text-slate-300 border-slate-700">
-                    🌆 Medellín (5-8 Tem)
-                </button>
-                <button onclick="switchCity('kahve')" id="btn-kahve" class="city-btn snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold border transition-all bg-slate-800 text-slate-300 border-slate-700">
-                    ☕ Kahve Bölgesi (9-11 Tem)
-                </button>
-                <button onclick="switchCity('santamarta')" id="btn-santamarta" class="city-btn snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold border transition-all bg-slate-800 text-slate-300 border-slate-700">
-                    🌴 Santa Marta (12-14 Tem)
-                </button>
-                <button onclick="switchCity('cartagena')" id="btn-cartagena" class="city-btn snap-start shrink-0 px-4 py-2 rounded-xl text-xs font-bold border transition-all bg-slate-800 text-slate-300 border-slate-700">
-                    🏰 Cartagena (15-18 Tem)
-                </button>
-            </div>
-
-            <div id="city-content" class="bg-slate-800 rounded-2xl border border-slate-700 shadow-xl overflow-hidden min-h-[300px]">
-            </div>
-        </section>
-
-        <section class="bg-slate-800 p-4 rounded-2xl border border-slate-700 shadow-xl">
-            <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-language text-emerald-400"></i> Lokal Sözlük (Slang)
-            </h2>
-            <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-700/50">
-                    <div><span class="font-bold text-emerald-400">¡Parce! / Parcero</span></div>
-                    <div class="text-sm text-slate-300 text-right">Kanka, dostum (Medellín favorisi)</div>
-                </div>
-                <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-700/50">
-                    <div><span class="font-bold text-emerald-400">Chévere / Bacano</span></div>
-                    <div class="text-sm text-slate-300 text-right">Harika, çok iyi, süper</div>
-                </div>
-                <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-700/50">
-                    <div><span class="font-bold text-emerald-400">¿Cuánto vale?</span></div>
-                    <div class="text-sm text-slate-300 text-right">Bu ne kadar tutuyor?</div>
-                </div>
-                <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-700/50">
-                    <div><span class="font-bold text-emerald-400">La cuenta, por favor</span></div>
-                    <div class="text-sm text-slate-300 text-right">Hesap lütfen</div>
-                </div>
-                <div class="flex justify-between items-center bg-slate-900/40 p-2.5 rounded-xl border border-slate-700/50">
-                    <div><span class="font-bold text-emerald-400">No dar papaya</span></div>
-                    <div class="text-sm text-slate-300 text-right">"Zafiyet verme" (Güvenlik mottosu)</div>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- DÜZELTME 3: nav-wrapper ile fixed + max-w-md çakışması çözüldü -->
-    <div class="nav-wrapper">
-        <nav class="nav-inner bg-slate-800/95 backdrop-blur-md border-t border-slate-700 py-2 px-6 flex justify-around items-center">
-            <a href="https://www.cabify.com" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
-                <i class="fa-solid fa-car text-xl"></i>
-                <span class="text-[10px]">Cabify</span>
-            </a>
-            <a href="https://www.uber.com" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
-                <i class="fa-solid fa-taxi text-xl"></i>
-                <span class="text-[10px]">Uber</span>
-            </a>
-            <a href="https://www.google.com/maps" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
-                <i class="fa-solid fa-map-location-dot text-xl"></i>
-                <span class="text-[10px]">Harita</span>
-            </a>
-            <a href="https://translate.google.com" target="_blank" class="flex flex-col items-center gap-1 text-slate-400 hover:text-emerald-400 transition-colors">
-                <i class="fa-solid fa-language text-xl"></i>
-                <span class="text-[10px]">Çeviri</span>
-            </a>
-        </nav>
+<header class="app-header">
+    <div>
+        <h1 id="header-title"><i class="fa-solid fa-compass" style="margin-right:6px"></i>Colombia '26</h1>
+        <p>1 - 18 Temmuz 2026</p>
     </div>
+    <div class="badge"><span class="dot"></span>Offline Hazır</div>
+</header>
 
-    <script>
-        // Varsayılan kur: 10.000 COP = 85 TRY
-        const DEFAULT_RATE = 0.0085;
-        let currentRate = DEFAULT_RATE;
-
-        // DÜZELTME 5: Kur güncelleme fonksiyonları
-        function updateRate() {
-            const rateInput = document.getElementById('rateInput');
-            const val = parseFloat(rateInput.value);
-            if (!isNaN(val) && val > 0) {
-                currentRate = val / 10000;
-            }
-        }
-
-        function resetRate() {
-            currentRate = DEFAULT_RATE;
-            document.getElementById('rateInput').value = '';
-            document.getElementById('copInput').value = '';
-            document.getElementById('tryInput').value = '';
-        }
-
-        function convertCurrency(type) {
-            const copInput = document.getElementById('copInput');
-            const tryInput = document.getElementById('tryInput');
-
-            if (type === 'cop') {
-                const val = parseFloat(copInput.value);
-                tryInput.value = !isNaN(val) ? (val * currentRate).toFixed(1) : '';
-            } else {
-                const val = parseFloat(tryInput.value);
-                copInput.value = !isNaN(val) ? (val / currentRate).toFixed(0) : '';
-            }
-        }
-
-        // Rota Bilgileri Veri Seti
-        const data = {
-            bogota: {
-                title: "Bogotá",
-                dates: "1 - 4 Temmuz 2026",
-                alert: "⚠️ RAKIM UYARISI: Bogotá yaklaşık 2600m rakımdadır. İlk gün tempoyu düşük tutun, bol su ve koka çayı tüketin.",
-                days: [
-                    { day: "1 Temmuz (G1)", text: "İstanbul'dan varış, otele yerleşme, hafif yürüyüş ve ilk Kolombiya kahvesi." },
-                    { day: "2 Temmuz (G2)", text: "La Candelaria yürüyüş rotası, Plaza Bolívar çevresi, kolonyal sokaklar ve kahve tadımı." },
-                    { day: "3 Temmuz (G3)", text: "Monserrate tepesinden şehir panoraması, Museo del Oro (Altın Müzesi) ve Botero Müzesi." },
-                    { day: "4 Temmuz (G4)", text: "Esnek Gün: Zipaquirá Tuz Katedrali turu veya Food Tour / Kahve Atölyesi." }
-                ]
-            },
-            medellin: {
-                title: "Medellín",
-                dates: "5 - 8 Temmuz 2026",
-                alert: "🚠 ULAŞIM: Şehir içi seyahatlerde entegre Metro ve Metrocable (teleferik) sistemini kullanın. Bandeja Paisa yemeği yerel lezzet tavsiyesidir.",
-                days: [
-                    { day: "5 Temmuz (G5)", text: "Bogotá → Medellín uçuşu. Akşam El Poblado veya Laureles bölgelerinde yemek keşfi." },
-                    { day: "6 Temmuz (G6)", text: "Metro sistemi ve Metrocable deneyimi ile parklar ve meydanlar turu." },
-                    { day: "7 Temmuz (G7)", text: "Comuna 13 (Rehberli tur önerilir). Graffiti bölgeleri, yürüyen merdivenler. (Gündüz ziyaret edin)." },
-                    { day: "8 Temmuz (G8)", text: "Guatapé Günü: Piedra del Peñol zirve manzarası (740 basamak!) ve renkli Guatapé kasabası." }
-                ]
-            },
-            kahve: {
-                title: "Kahve Bölgesi (Eje Cafetero)",
-                dates: "9 - 11 Temmuz 2026",
-                alert: "☕ AVANTAJ: Pereira (PEI) havalimanı bağlantılar için en rahat noktadır. Salento içi ulaşımda ikonik 'Willys' Jeeplerini kullanın.",
-                days: [
-                    { day: "9 Temmuz (G9)", text: "Medellín → Pereira uçuşu. Salento veya Filandia kasabasına geçiş ve akşam keşfi." },
-                    { day: "10 Temmuz (G10)", text: "Cocora Vadisi yürüyüşü (Dev balmumu palmiyeleri) ve doğa fotoğrafçılığı." },
-                    { day: "11 Temmuz (G11)", text: "Geleneksel bir Coffee Finca'da (Kahve Çiftliği) üretim süreci turu ve tadım etkinliği." }
-                ]
-            },
-            santamarta: {
-                title: "Santa Marta & Minca / Tayrona",
-                dates: "12 - 14 Temmuz 2026",
-                alert: "🌴 TRANSFER NOTU: 15 Temmuz'da Santa Marta'dan Cartagena'ya uçak yerine 4-5 saatlik konforlu bir kara transferi yapılması önerilir.",
-                days: [
-                    { day: "12 Temmuz (G12)", text: "Pereira → Santa Marta uçuşu. Karayip kıyısına geçiş. Doğal ve sakin alternatif olan Minca konaklaması tercih edilebilir." },
-                    { day: "13 Temmuz (G13)", text: "Tayrona Milli Parkı: Erken giriş ile orman yürüyüşü ve büyüleyici Cabo San Juan plajı." },
-                    { day: "14 Temmuz (G14)", text: "Yavaş Tempo/Dinlenme: Minca şelaleleri, bulut ormanları ve Sierra Nevada etekleri." }
-                ]
-            },
-            cartagena: {
-                title: "Cartagena de Indias",
-                dates: "15 - 18 Temmuz 2026",
-                alert: "🏰 REZERVASYON: Rosario Adaları / Beach Club turlarını yüksek sezon kalabalığı nedeniyle önceden ayırtın. Surlarda gün batımı kaçmaz.",
-                days: [
-                    { day: "15 Temmuz (G15)", text: "Santa Marta → Cartagena kara transferi (sabah çıkış). Akşam tarihi sur içi (Old Town) yürüyüşü." },
-                    { day: "16 Temmuz (G16)", text: "Tarihi Merkez ve Getsemaní sokak sanatı keşfi. Şehir surlarında muhteşem Karayip gün batımı." },
-                    { day: "17 Temmuz (G17)", text: "Rosario Adaları'nda şnorkel ve Beach Club turu veya şehirde serbest keyif zamanı." },
-                    { day: "18 Temmuz (G18)", text: "Uygulamadan son kontroller, hatıralar baki ve Bogotá aktarmalı İstanbul'a dönüş uçuşu." }
-                ]
-            }
-        };
-
-        function switchCity(cityKey) {
-            document.querySelectorAll('.city-btn').forEach(btn => {
-                btn.classList.remove('bg-emerald-500', 'text-slate-900', 'border-emerald-400', 'shadow-lg', 'shadow-emerald-500/10');
-                btn.classList.add('bg-slate-800', 'text-slate-300', 'border-slate-700');
-            });
-            const selectedBtn = document.getElementById(`btn-${cityKey}`);
-            selectedBtn.classList.remove('bg-slate-800', 'text-slate-300', 'border-slate-700');
-            selectedBtn.classList.add('bg-emerald-500', 'text-slate-900', 'border-emerald-400', 'shadow-lg', 'shadow-emerald-500/10');
-
-            const city = data[cityKey];
-            let daysHTML = '';
-            
-            city.days.forEach(d => {
-                daysHTML += `
-                    <div class="border-l-2 border-emerald-500/50 pl-4 relative space-y-1">
-                        <span class="absolute w-3 h-3 bg-emerald-500 rounded-full -left-[7px] top-1.5 border-2 border-slate-800"></span>
-                        <h4 class="text-xs font-bold text-emerald-400">${d.day}</h4>
-                        <p class="text-sm text-slate-300 leading-relaxed">${d.text}</p>
-                    </div>
-                `;
-            });
-
-            const contentArea = document.getElementById('city-content');
-            contentArea.innerHTML = `
-                <div class="p-4 bg-slate-800/50 border-b border-slate-700 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-white text-base">${city.title}</h3>
-                        <p class="text-xs text-slate-400">${city.dates}</p>
-                    </div>
-                    <i class="fa-solid fa-map-pin text-xl text-emerald-500"></i>
+<main>
+    <section class="card cp">
+        <div class="slbl"><i class="fa-solid fa-money-bill-transfer" id="cur-icon" style="transition:color .6s"></i>&nbsp;COP → TRY Çevirici</div>
+        <div class="cgrid">
+            <div class="cbox"><label>Kolombiya Pesosu (COP)</label>
+                <div style="display:flex;align-items:center"><span class="csym">$</span>
+                    <input type="number" id="copInput" placeholder="50000" min="0" oninput="conv('cop')">
                 </div>
-                <div class="p-4 space-y-4">
-                    <div class="bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs p-3 rounded-xl leading-relaxed">
-                        ${city.alert}
-                    </div>
-                    <div class="space-y-5 pt-2">
-                        ${daysHTML}
-                    </div>
+            </div>
+            <div class="cbox"><label>Türk Lirası (TRY)</label>
+                <div style="display:flex;align-items:center"><span class="csym">₺</span>
+                    <input type="number" id="tryInput" placeholder="425" min="0" oninput="conv('try')">
                 </div>
+            </div>
+        </div>
+        <div class="rrow">
+            <div class="rbox">
+                <span class="rlbl">Kur:</span>
+                <input type="number" id="rateInput" placeholder="85" min="0" step="0.1" oninput="updRate()">
+                <span class="rlbl">TRY / 10k COP</span>
+            </div>
+            <button class="rbtn" onclick="resetRate()">Sıfırla</button>
+        </div>
+        <p class="rnote">* Kuru manuel güncelleyebilirsiniz.</p>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:.75rem">
+        <div class="slbl" style="padding:0 4px"><i class="fa-solid fa-route" id="route-icon" style="transition:color .6s"></i>&nbsp;Seyahat Rotası</div>
+        <div class="tabs">
+            <button class="tbtn on" data-c="bogota"     onclick="sw('bogota')">📍 Bogotá (1-4 Tem)</button>
+            <button class="tbtn"    data-c="medellin"   onclick="sw('medellin')">🌆 Medellín (5-8 Tem)</button>
+            <button class="tbtn"    data-c="kahve"      onclick="sw('kahve')">☕ Kahve Bölgesi (9-11 Tem)</button>
+            <button class="tbtn"    data-c="santamarta" onclick="sw('santamarta')">🌴 Santa Marta (12-14 Tem)</button>
+            <button class="tbtn"    data-c="cartagena"  onclick="sw('cartagena')">🏰 Cartagena (15-18 Tem)</button>
+        </div>
+        <div id="cc" class="card"></div>
+    </section>
+
+    <section class="card cp">
+        <div class="slbl"><i class="fa-solid fa-language" id="lang-icon" style="transition:color .6s"></i>&nbsp;Lokal Sözlük (Slang)</div>
+        <div style="max-height:200px;overflow-y:auto">
+            <div class="di"><span class="dw" id="dw1">¡Parce! / Parcero</span><span class="dd">Kanka, dostum</span></div>
+            <div class="di"><span class="dw" id="dw2">Chévere / Bacano</span><span class="dd">Harika, süper</span></div>
+            <div class="di"><span class="dw" id="dw3">¿Cuánto vale?</span><span class="dd">Ne kadar tutuyor?</span></div>
+            <div class="di"><span class="dw" id="dw4">La cuenta, por favor</span><span class="dd">Hesap lütfen</span></div>
+            <div class="di"><span class="dw" id="dw5">No dar papaya</span><span class="dd">"Zafiyet verme"</span></div>
+        </div>
+    </section>
+</main>
+
+<div class="nwrap">
+    <nav class="ninner">
+        <a href="https://www.cabify.com" target="_blank"><i class="fa-solid fa-car"></i><span>Cabify</span></a>
+        <a href="https://www.uber.com"   target="_blank"><i class="fa-solid fa-taxi"></i><span>Uber</span></a>
+        <a href="https://www.google.com/maps" target="_blank"><i class="fa-solid fa-map-location-dot"></i><span>Harita</span></a>
+        <a href="https://translate.google.com" target="_blank"><i class="fa-solid fa-language"></i><span>Çeviri</span></a>
+    </nav>
+</div>
+
+<script>
+// ── CURRENCY ──
+const DEF=0.0085; let rate=DEF;
+function updRate(){const v=parseFloat(document.getElementById('rateInput').value);if(!isNaN(v)&&v>0)rate=v/10000;}
+function resetRate(){rate=DEF;['rateInput','copInput','tryInput'].forEach(id=>document.getElementById(id).value='');}
+function conv(t){
+    const c=document.getElementById('copInput'),r=document.getElementById('tryInput');
+    if(t==='cop'){const v=parseFloat(c.value);r.value=!isNaN(v)?(v*rate).toFixed(1):'';}
+    else{const v=parseFloat(r.value);c.value=!isNaN(v)?(v/rate).toFixed(0):'';}
+}
+
+// ── CITY DATA ──
+const D={
+    bogota:{cls:'ab',title:'Bogotá',dates:'1 - 4 Temmuz 2026',ac:'#6B9FD4',
+        bg:'bg-bogota',emoji:'📍',
+        alert:'⚠️ RAKIM UYARISI: Bogotá yaklaşık 2600m rakımdadır. İlk gün tempoyu düşük tutun, bol su ve koka çayı tüketin.',
+        days:[
+            {d:'1 Temmuz (G1)',t:'İstanbul\'dan varış, otele yerleşme, hafif yürüyüş ve ilk Kolombiya kahvesi. Erken uyku önerilir.'},
+            {d:'2 Temmuz (G2)',t:'La Candelaria yürüyüş rotası, Plaza Bolívar çevresi, kolonyal sokaklar ve kahve tadımı.'},
+            {d:'3 Temmuz (G3)',t:'Monserrate tepesinden şehir panoraması, Museo del Oro ve Botero Müzesi. Öğleden sonra serbest.'},
+            {d:'4 Temmuz (G4)',t:'Esnek Gün: Zipaquirá Tuz Katedrali turu veya Food Tour / Kahve Atölyesi.'}
+        ]},
+    medellin:{cls:'am',title:'Medellín',dates:'5 - 8 Temmuz 2026',ac:'#E8725A',
+        bg:'bg-medellin',emoji:'🌆',
+        alert:'🚠 ULAŞIM: Entegre Metro ve Metrocable sistemini kullanın. Akşam yemeği için Bandeja Paisa deneyin.',
+        days:[
+            {d:'5 Temmuz (G5)',t:'Bogotá → Medellín uçuşu. Akşam El Poblado veya Laureles bölgelerinde yemek keşfi.'},
+            {d:'6 Temmuz (G6)',t:'Metro + Metrocable deneyimi. Şehir parkları, meydanlar ve akşam restoran keşfi.'},
+            {d:'7 Temmuz (G7)',t:'Comuna 13 — rehberli tur önerilir. Graffiti bölgeleri ve yürüyen merdivenler. Gündüz ziyaret edin.'},
+            {d:'8 Temmuz (G8)',t:'Guatapé günü: Piedra del Peñol\'den zirve manzarası (740 basamak!) ve renkli kasaba.'}
+        ]},
+    kahve:{cls:'ak',title:'Kahve Bölgesi (Eje Cafetero)',dates:'9 - 11 Temmuz 2026',ac:'#8FBE6A',
+        bg:'bg-kahve',emoji:'☕',
+        alert:'☕ AVANTAJ: Pereira (PEI) bağlantılar için en rahat noktadır. Salento içinde ikonik Willys Jeeplerini kullanın.',
+        days:[
+            {d:'9 Temmuz (G9)',t:'Medellín → Pereira uçuşu. Salento veya Filandia kasabasına geçiş ve akşam keşfi.'},
+            {d:'10 Temmuz (G10)',t:'Cocora Vadisi yürüyüşü — dev balmumu palmiyeleri arasında doğa fotoğrafçılığı.'},
+            {d:'11 Temmuz (G11)',t:'Coffee Finca\'da (Kahve Çiftliği) üretim turu, tadım etkinliği ve yerel pazar.'}
+        ]},
+    santamarta:{cls:'as',title:'Santa Marta & Minca / Tayrona',dates:'12 - 14 Temmuz 2026',ac:'#5BBFD4',
+        bg:'bg-santa',emoji:'🌴',
+        alert:'🌴 TRANSFER NOTU: 15 Temmuz\'da Cartagena\'ya 4-5 saatlik kara transferi uçuşa kıyasla çok daha pratiktir.',
+        days:[
+            {d:'12 Temmuz (G12)',t:'Pereira → Santa Marta uçuşu. Minca alternatifi: daha sakin, şelaleli, Sierra Nevada manzaralı.'},
+            {d:'13 Temmuz (G13)',t:'Tayrona Milli Parkı: erken giriş, orman yürüyüşü ve Cabo San Juan plajı.'},
+            {d:'14 Temmuz (G14)',t:'Yavaş tempo: Minca şelaleleri, bulut ormanları ve Sierra Nevada eteklerinde dinlenme.'}
+        ]},
+    cartagena:{cls:'ac',title:'Cartagena de Indias',dates:'15 - 18 Temmuz 2026',ac:'#F0A947',
+        bg:'bg-cartagena',emoji:'🏰',
+        alert:'🏰 REZERVASYON: Rosario Adaları turlarını önceden ayırtın. Şehir surlarında gün batımı kesinlikle kaçmaz.',
+        days:[
+            {d:'15 Temmuz (G15)',t:'Santa Marta → Cartagena kara transferi (sabah çıkış). Akşam Old Town yürüyüşü.'},
+            {d:'16 Temmuz (G16)',t:'Tarihi Merkez ve Getsemaní sokak sanatı. Şehir surlarında Karayip gün batımı ve canlı müzik.'},
+            {d:'17 Temmuz (G17)',t:'Rosario Adaları\'nda şnorkel ve Beach Club — veya şehirde serbest keyif.'},
+            {d:'18 Temmuz (G18)',t:'Son kontroller, hatıralar baki. Bogotá aktarmalı İstanbul\'a dönüş uçuşu.'}
+        ]}
+};
+
+// ── SVG SCENES ──
+const scenes = {
+    bogota: `
+        <!-- Stars -->
+        <g opacity="0.6">
+            ${Array.from({length:60},(_,i)=>{
+                const x=Math.sin(i*137.5)*200+200, y=Math.sin(i*97.3)*150+120;
+                const r=Math.random()*.8+.2;
+                return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}" fill="white" opacity="${(Math.random()*.5+.3).toFixed(2)}"/>`;
+            }).join('')}
+        </g>
+        <!-- Moon -->
+        <circle cx="320" cy="80" r="28" fill="#c8d8f0" opacity="0.12" filter="url(#blur2)"/>
+        <circle cx="320" cy="80" r="18" fill="#d8e8ff" opacity="0.18"/>
+        <circle cx="327" cy="75" r="14" fill="#0d1520" opacity="0.9"/>
+        <!-- Andean mountains far -->
+        <path d="M-10,520 Q80,310 160,380 Q240,280 310,340 Q370,260 450,320 L450,800 L-10,800 Z" fill="#1a2540" opacity="0.7" filter="url(#blur3)"/>
+        <!-- Andean mountains mid -->
+        <path d="M-10,560 Q60,400 130,450 Q200,350 270,420 Q330,370 410,430 L410,800 L-10,800 Z" fill="#1e2d50" opacity="0.8" filter="url(#blur2)"/>
+        <!-- Andean mountains near -->
+        <path d="M-10,600 Q50,480 110,510 Q170,440 240,490 Q300,450 370,500 Q410,480 460,510 L460,800 L-10,800 Z" fill="#22325a" opacity="0.9" filter="url(#blur1)"/>
+        <!-- Monserrate church silhouette -->
+        <rect x="185" y="430" width="6" height="30" fill="#6B9FD4" opacity="0.5"/>
+        <polygon points="185,430 191,430 188,418" fill="#6B9FD4" opacity="0.5"/>
+        <!-- City lights below -->
+        <g opacity="0.4" filter="url(#blur1)">
+            ${Array.from({length:80},(_,i)=>{
+                const x=(i*47+13)%420, y=630+Math.sin(i*23)*40;
+                const c=['#6B9FD4','#a0c0e0','#ffffff','#c8d8f8'][i%4];
+                return `<circle cx="${x}" cy="${y}" r="${(Math.random()*.8+.3).toFixed(1)}" fill="${c}" opacity="${(Math.random()*.6+.3).toFixed(2)}"/>`;
+            }).join('')}
+        </g>
+        <!-- Mist layers -->
+        <ellipse cx="200" cy="520" rx="300" ry="40" fill="#6B9FD4" opacity="0.04" filter="url(#blur3)"/>
+        <ellipse cx="200" cy="560" rx="280" ry="35" fill="#6B9FD4" opacity="0.05" filter="url(#blur3)"/>
+    `,
+    medellin: `
+        <!-- Warm night sky -->
+        <rect width="400" height="800" fill="transparent"/>
+        <!-- Graffiti-style color splashes on walls (abstract) -->
+        <ellipse cx="60" cy="200" rx="80" ry="120" fill="#E8725A" opacity="0.06" filter="url(#blur3)"/>
+        <ellipse cx="340" cy="350" rx="100" ry="80" fill="#f0a050" opacity="0.05" filter="url(#blur3)"/>
+        <ellipse cx="150" cy="600" rx="90" ry="70" fill="#E8725A" opacity="0.05" filter="url(#blur3)"/>
+        <!-- Hills behind city -->
+        <path d="M-10,480 Q80,320 160,380 Q230,300 300,360 Q360,310 460,370 L460,800 L-10,800Z" fill="#2a1510" opacity="0.85" filter="url(#blur2)"/>
+        <path d="M-10,530 Q70,420 140,460 Q210,390 290,440 Q350,400 460,450 L460,800 L-10,800Z" fill="#301808" opacity="0.9" filter="url(#blur1)"/>
+        <!-- Metro cable wires -->
+        <line x1="0" y1="360" x2="400" y2="310" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+        <line x1="0" y1="380" x2="400" y2="330" stroke="rgba(255,255,255,0.08)" stroke-width="0.5"/>
+        <!-- Cable car gondola -->
+        <rect x="170" y="325" width="18" height="12" rx="3" fill="#C0392B" opacity="0.6"/>
+        <line x1="179" y1="310" x2="179" y2="325" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
+        <rect x="230" y="318" width="16" height="11" rx="3" fill="#C0392B" opacity="0.5"/>
+        <line x1="238" y1="305" x2="238" y2="318" stroke="rgba(255,255,255,0.3)" stroke-width="0.8"/>
+        <!-- Dense city grid -->
+        <g opacity="0.5">
+            ${Array.from({length:120},(_,i)=>{
+                const x=(i*31+7)%420, y=490+Math.floor(i/14)*25+Math.sin(i)*8;
+                const w=4+Math.random()*6, h=15+Math.random()*30;
+                const lit=['#E8725A','#f0a060','#ffffff','#ffd080'][i%4];
+                return `<rect x="${x}" y="${y-h}" width="${w.toFixed(0)}" height="${h.toFixed(0)}" fill="${lit}" opacity="${(Math.random()*.3+.1).toFixed(2)}"/>`;
+            }).join('')}
+        </g>
+        <!-- Warm glow from city below -->
+        <ellipse cx="200" cy="780" rx="250" ry="80" fill="#E8725A" opacity="0.08" filter="url(#blur3)"/>
+        <!-- Stars (fewer - light pollution) -->
+        <g opacity="0.3">
+            ${Array.from({length:30},(_,i)=>{
+                const x=(i*113)%400, y=(i*73)%250;
+                return `<circle cx="${x}" cy="${y}" r=".5" fill="white" opacity="${(Math.random()*.4+.2).toFixed(2)}"/>`;
+            }).join('')}
+        </g>
+    `,
+    kahve: `
+        <!-- Green misty sky -->
+        <rect width="400" height="800" fill="transparent"/>
+        <!-- Mist / clouds -->
+        <ellipse cx="200" cy="150" rx="300" ry="80" fill="#8FBE6A" opacity="0.04" filter="url(#blur3)"/>
+        <ellipse cx="100" cy="200" rx="200" ry="60" fill="#a0d070" opacity="0.04" filter="url(#blur3)"/>
+        <!-- Rolling hills far -->
+        <path d="M-10,400 Q100,260 200,320 Q300,240 460,300 L460,800 L-10,800Z" fill="#1a2a0a" opacity="0.7" filter="url(#blur3)"/>
+        <path d="M-10,450 Q80,330 170,380 Q260,300 380,360 L460,800 L-10,800Z" fill="#1e3010" opacity="0.8" filter="url(#blur2)"/>
+        <!-- Mid hills with coffee plants suggestion -->
+        <path d="M-10,500 Q60,400 130,440 Q200,370 280,420 Q340,385 460,430 L460,800 L-10,800Z" fill="#223512" opacity="0.9" filter="url(#blur1)"/>
+        <!-- Wax palms (tall thin) -->
+        ${[70,130,200,265,320,370].map((x,i)=>{
+            const h=180+i*15, sw=2+i*.5;
+            return `
+            <line x1="${x}" y1="${500-h}" x2="${x}" y2="500" stroke="#4a6a20" stroke-width="${sw.toFixed(1)}" opacity="0.6"/>
+            <ellipse cx="${x}" cy="${500-h}" rx="${sw*4}" ry="${sw*2.5}" fill="#5a8a30" opacity="0.5"/>
             `;
-        }
+        }).join('')}
+        <!-- Cocora valley mist -->
+        <ellipse cx="200" cy="480" rx="280" ry="30" fill="#8FBE6A" opacity="0.07" filter="url(#blur2)"/>
+        <ellipse cx="200" cy="510" rx="260" ry="25" fill="#a0d070" opacity="0.06" filter="url(#blur2)"/>
+        <!-- Coffee cherry dots on foreground -->
+        <g opacity="0.4">
+            ${Array.from({length:40},(_,i)=>{
+                const x=(i*97+30)%380+10, y=620+Math.sin(i*17)*40;
+                return `<circle cx="${x}" cy="${y}" r="${(Math.random()*2+1).toFixed(1)}" fill="#c03020" opacity="${(Math.random()*.5+.3).toFixed(2)}"/>`;
+            }).join('')}
+        </g>
+        <!-- Soft dawn light -->
+        <ellipse cx="200" cy="0" rx="200" ry="100" fill="#8FBE6A" opacity="0.06" filter="url(#blur3)"/>
+        <!-- Stars fading -->
+        <g opacity="0.25">
+            ${Array.from({length:25},(_,i)=>{
+                const x=(i*113)%400, y=(i*53)%180;
+                return `<circle cx="${x}" cy="${y}" r=".6" fill="white" opacity="${(Math.random()*.4+.1).toFixed(2)}"/>`;
+            }).join('')}
+        </g>
+    `,
+    santamarta: `
+        <!-- Caribbean night sky -->
+        <rect width="400" height="800" fill="transparent"/>
+        <!-- Stars reflected in water -->
+        <g opacity="0.55">
+            ${Array.from({length:50},(_,i)=>{
+                const x=(i*137)%400, y=(i*73)%300;
+                return `<circle cx="${x}" cy="${y}" r="${(Math.random()*.7+.2).toFixed(1)}" fill="white" opacity="${(Math.random()*.6+.3).toFixed(2)}"/>`;
+            }).join('')}
+        </g>
+        <!-- Moon reflection -->
+        <circle cx="300" cy="90" r="22" fill="#5BBFD4" opacity="0.12" filter="url(#blur2)"/>
+        <circle cx="300" cy="90" r="14" fill="#d0f0ff" opacity="0.2"/>
+        <circle cx="306" cy="86" r="11" fill="#04111a" opacity="0.9"/>
+        <!-- Sierra Nevada silhouette -->
+        <path d="M-10,420 Q100,250 200,310 Q280,220 380,280 L460,800 L-10,800Z" fill="#061a22" opacity="0.75" filter="url(#blur3)"/>
+        <path d="M-10,470 Q90,340 170,390 Q250,310 360,370 L460,800 L-10,800Z" fill="#081e28" opacity="0.85" filter="url(#blur2)"/>
+        <!-- Jungle/coast treeline -->
+        <path d="M-10,520 Q60,470 120,490 Q180,455 240,480 Q300,460 360,485 Q400,470 460,490 L460,800 L-10,800Z" fill="#0a2a18" opacity="0.9" filter="url(#blur1)"/>
+        <!-- Palm trees -->
+        ${[40,95,200,300,355].map((x,i)=>{
+            const h=100+i*12;
+            return `
+            <path d="M${x},${530-h} Q${x+8},${530-h*0.6} ${x},530" stroke="#1a4a20" stroke-width="2.5" fill="none" opacity="0.65"/>
+            <ellipse cx="${x-12}" cy="${530-h}" rx="18" ry="8" fill="#1e5a18" opacity="0.5" transform="rotate(-20,${x-12},${530-h})"/>
+            <ellipse cx="${x+10}" cy="${530-h+5}" rx="16" ry="7" fill="#226020" opacity="0.5" transform="rotate(15,${x+10},${530-h+5})"/>
+            <ellipse cx="${x}" cy="${530-h-8}" rx="14" ry="6" fill="#1e5a18" opacity="0.5"/>
+            `;
+        }).join('')}
+        <!-- Sea -->
+        <path d="M-10,590 Q100,570 200,580 Q300,568 460,578 L460,800 L-10,800Z" fill="#0a2535" opacity="0.8"/>
+        <!-- Gentle waves -->
+        <path d="M0,595 Q50,588 100,594 Q150,600 200,592 Q250,586 300,593 Q350,599 400,591" stroke="#5BBFD4" stroke-width="1" fill="none" opacity="0.25"/>
+        <path d="M0,615 Q50,608 100,614 Q150,620 200,612 Q250,606 300,613 Q350,619 400,611" stroke="#5BBFD4" stroke-width="0.8" fill="none" opacity="0.18"/>
+        <!-- Bioluminescence dots in sea -->
+        <g opacity="0.3">
+            ${Array.from({length:25},(_,i)=>{
+                const x=(i*157)%400, y=600+Math.random()*60;
+                return `<circle cx="${x}" cy="${y}" r="${(Math.random()*1.5+.5).toFixed(1)}" fill="#5BBFD4" opacity="${(Math.random()*.5+.2).toFixed(2)}"/>`;
+            }).join('')}
+        </g>
+        <!-- Moon glow on sea -->
+        <ellipse cx="300" cy="620" rx="80" ry="15" fill="#5BBFD4" opacity="0.06" filter="url(#blur2)"/>
+    `,
+    cartagena: `
+        <!-- Warm sunset / dusk sky -->
+        <rect width="400" height="800" fill="transparent"/>
+        <!-- Sunset glow bands -->
+        <ellipse cx="200" cy="0" rx="350" ry="200" fill="#F0A947" opacity="0.09" filter="url(#blur3)"/>
+        <ellipse cx="200" cy="120" rx="300" ry="150" fill="#e07820" opacity="0.07" filter="url(#blur3)"/>
+        <!-- Stars starting to appear -->
+        <g opacity="0.35">
+            ${Array.from({length:35},(_,i)=>{
+                const x=(i*113)%400, y=(i*53)%280;
+                return `<circle cx="${x}" cy="${y}" r="${(Math.random()*.6+.2).toFixed(1)}" fill="white" opacity="${(Math.random()*.5+.2).toFixed(2)}"/>`;
+            }).join('')}
+        </g>
+        <!-- Caribbean sea horizon -->
+        <path d="M-10,450 Q200,440 460,450 L460,800 L-10,800Z" fill="#1a1008" opacity="0.6"/>
+        <!-- City walls / fortification silhouette -->
+        <path d="M-10,500 Q30,480 60,490 L60,460 L70,460 L70,450 L80,450 L80,460 L100,460 L100,490 Q130,480 160,490 L160,460 L170,460 L170,450 L180,450 L180,460 L200,460 L200,500 Q250,480 300,490 L300,470 L310,470 L310,460 L320,460 L320,470 L340,470 L340,490 Q380,480 460,490 L460,800 L-10,800Z"
+              fill="#2a1a08" opacity="0.9"/>
+        <!-- Colonial buildings -->
+        <rect x="20"  y="430" width="35" height="70" rx="1" fill="#3a2010" opacity="0.8"/>
+        <rect x="58"  y="415" width="40" height="85" rx="1" fill="#2e1808" opacity="0.85"/>
+        <rect x="101" y="425" width="30" height="75" rx="1" fill="#341c0a" opacity="0.8"/>
+        <rect x="200" y="420" width="45" height="80" rx="1" fill="#2e1808" opacity="0.85"/>
+        <rect x="248" y="430" width="35" height="70" rx="1" fill="#3a2010" opacity="0.8"/>
+        <rect x="300" y="410" width="50" height="90" rx="1" fill="#2a1508" opacity="0.9"/>
+        <rect x="353" y="425" width="40" height="75" rx="1" fill="#341c0a" opacity="0.8"/>
+        <!-- Church towers -->
+        <rect x="75"  y="385" width="8" height="30" fill="#3a2010" opacity="0.8"/>
+        <polygon points="75,385 83,385 79,370" fill="#3a2010" opacity="0.8"/>
+        <rect x="215" y="390" width="8" height="30" fill="#2e1808" opacity="0.85"/>
+        <polygon points="215,390 223,390 219,374" fill="#2e1808" opacity="0.85"/>
+        <!-- Lit windows (warm orange) -->
+        <g opacity="0.55">
+            ${Array.from({length:60},(_,i)=>{
+                const bx=[20,58,101,200,248,300,353][i%7];
+                const x=bx+Math.floor((i/7)%4)*8+2;
+                const y=440+Math.floor(i/28)*18;
+                const col=['#F0A947','#f0c060','#e08030','#ffb840'][i%4];
+                return `<rect x="${x}" y="${y}" width="5" height="7" rx="1" fill="${col}" opacity="${(Math.random()*.5+.3).toFixed(2)}"/>`;
+            }).join('')}
+        </g>
+        <!-- Sea glow / reflection -->
+        <ellipse cx="200" cy="680" rx="300" ry="60" fill="#F0A947" opacity="0.06" filter="url(#blur3)"/>
+        <!-- Sea surface -->
+        <path d="M-10,560 Q100,548 200,555 Q300,548 460,558 L460,800 L-10,800Z" fill="#160c04" opacity="0.7"/>
+        <!-- Gentle waves with warm tones -->
+        <path d="M0,570 Q50,563 100,570 Q150,577 200,568 Q250,560 300,568 Q350,575 400,566" stroke="#F0A947" stroke-width="0.8" fill="none" opacity="0.2"/>
+        <path d="M0,588 Q50,581 100,588 Q150,595 200,586 Q250,578 300,586 Q350,593 400,584" stroke="#f0c060" stroke-width="0.6" fill="none" opacity="0.15"/>
+        <!-- Bougainvillea petals (floating dots in warm colors) -->
+        <g opacity="0.4">
+            ${Array.from({length:20},(_,i)=>{
+                const x=(i*137+20)%380, y=400+Math.random()*120;
+                const col=['#e060a0','#f08030','#f0a040'][i%3];
+                return `<ellipse cx="${x}" cy="${y}" rx="${(Math.random()*3+1).toFixed(1)}" ry="${(Math.random()*2+0.5).toFixed(1)}" fill="${col}" opacity="${(Math.random()*.4+.2).toFixed(2)}" transform="rotate(${Math.floor(Math.random()*360)},${x},${y})"/>`;
+            }).join('')}
+        </g>
+    `
+};
 
-        window.onload = () => {
-            switchCity('bogota');
-        };
-    </script>
+// ── THEME SWITCH ──
+function applyTheme(key){
+    const c=D[key];
+    // body background class
+    document.body.className=c.bg;
+    // accent color on UI elements
+    document.getElementById('header-title').style.color=c.ac;
+    document.getElementById('cur-icon').style.color=c.ac;
+    document.getElementById('route-icon').style.color=c.ac;
+    document.getElementById('lang-icon').style.color=c.ac;
+    document.getElementById('rateInput').style.color=c.ac;
+    document.querySelectorAll('.dw').forEach(el=>el.style.color=c.ac);
+    document.querySelectorAll('.ninner a').forEach(el=>el.style.setProperty('--hover',c.ac));
+    // SVG scene
+    document.getElementById('scene-group').innerHTML=scenes[key];
+}
+
+// ── SWITCH CITY ──
+function sw(k){
+    document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+    document.querySelector(`.tbtn[data-c="${k}"]`).classList.add('on');
+    applyTheme(k);
+    const c=D[k];
+    const days=c.days.map(d=>`
+        <div class="ti">
+            <span class="tdot"></span>
+            <div class="tday">${d.d}</div>
+            <div class="ttxt">${d.t}</div>
+        </div>`).join('');
+    const el=document.getElementById('cc');
+    el.className=`card ${c.cls}`;
+    el.innerHTML=`
+        <div class="chdr">
+            <div><h3>${c.title}</h3><p>${c.dates}</p></div>
+            <i class="fa-solid fa-map-pin pin" style="font-size:1.2rem"></i>
+        </div>
+        <div class="cbdy">
+            <div class="calert">${c.alert}</div>
+            <div class="tl">${days}</div>
+        </div>`;
+}
+
+window.onload=()=>sw('bogota');
+</script>
 </body>
 </html>
